@@ -1,0 +1,29 @@
+{
+  "name": "ultravox-transfer-call-example",
+  "version": "1.0.0",
+  "description": "Example jambonz app that integrates with Ultravox to transfer a call from AI agent to human agent.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jambonz/ultravox-transfer-call-example.git"
+  },
+  "keywords": [
+    "transfer",
+    "call"
+  ],
+  "author": "Julia Biro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jambonz/ultravox-transfer-call-example/issues"
+  },
+  "homepage": "https://github.com/jambonz/ultravox-transfer-call-example#readme",
+  "dependencies": {
+    "@jambonz/node-client-ws": "^0.1.79",
+    "dotenv": "^16.5.0",
+    "pino": "^9.6.0"
+  }
+}
