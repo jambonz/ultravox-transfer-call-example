@@ -27,6 +27,7 @@ const service = ({logger, makeService}) => {
                 .on('/dialAction', dialAction.bind(null, session));
         
             session
+                .answer()
                 .pause({length: 1.5})
                 .llm({
                     vendor: 'ultravox',
@@ -55,7 +56,7 @@ const service = ({logger, makeService}) => {
                                     client: {}
                                 }
                             }
-                          ],
+                        ],
                     }
                 })
                 .hangup()
