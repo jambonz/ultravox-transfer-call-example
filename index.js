@@ -120,52 +120,56 @@ const onError = (session, err) => {
 };
 
 const onToolCall = async(session, evt) => {
-    const {logger} = session.locals;
-    const {name, args, tool_call_id} = evt;
-    const {conversation_summary} = args;
-    logger.info({evt}, `got toolHook for ${name} with tool_call_id ${tool_call_id}`);
+    let timeoutID;
+    if (timeoutID === undefined) {
+        // This is the first time we are calling the tool    
+        const {logger} = session.locals;
+        const {name, args, tool_call_id} = evt;
+        const {conversation_summary} = args;
+        logger.info({evt}, `got toolHook for ${name} with tool_call_id ${tool_call_id}`);
 
-    session.locals.conversation_summary = conversation_summary;
+        session.locals.conversation_summary = conversation_summary;
 
-    try {
-        const data = {
-            type: 'client_tool_result',
-            invocation_id: tool_call_id,
-            result: "Successfully transferred call to agent, telling user to wait for a moment.",
-        };
-    
-        setTimeout(() => {
-            session.sendCommand('redirect', [
-                {
-                    verb: 'say',
-                    text: 'Please wait while I connect your call'
-                },
-                {
-                    verb: 'dial',
-                    actionHook: '/dialAction',
-                    confirmHook: '/confirmAction',
-                    callerId: process.env.HUMAN_AGENT_CALLERID,
-                    target: [
-                        {
-                            type: 'phone',
-                            number: process.env.HUMAN_AGENT_NUMBER,
-                            trunk: process.env.HUMAN_AGENT_TRUNK
-                        }
-                    ]
-                }
-            ]);
-        }, 5000);
-    
-        session.sendToolOutput(tool_call_id, data);
-  
-    } catch (err) {
-        logger.info({err}, 'error transferring call');
-        const data = {
-            type: 'client_tool_result',
-            invocation_id: tool_call_id,
-            error_message: 'Failed to transfer call'
-        };
-        session.sendToolOutput(tool_call_id, data);
+        try {
+            const data = {
+                type: 'client_tool_result',
+                invocation_id: tool_call_id,
+                result: "Successfully transferred call to agent, telling user to wait for a moment.",
+            };
+        
+            timeoutID = setTimeout(() => {
+                session.sendCommand('redirect', [
+                    {
+                        verb: 'say',
+                        text: 'Please wait while I connect your call'
+                    },
+                    {
+                        verb: 'dial',
+                        actionHook: '/dialAction',
+                        confirmHook: '/confirmAction',
+                        callerId: process.env.HUMAN_AGENT_CALLERID,
+                        target: [
+                            {
+                                type: 'phone',
+                                number: process.env.HUMAN_AGENT_NUMBER,
+                                trunk: process.env.HUMAN_AGENT_TRUNK
+                            }
+                        ]
+                    }
+                ]);
+            }, 5000);
+        
+            session.sendToolOutput(tool_call_id, data);
+        
+        } catch (err) {
+            logger.info({err}, 'error transferring call');
+            const data = {
+                type: 'client_tool_result',
+                invocation_id: tool_call_id,
+                error_message: 'Failed to transfer call'
+            };
+            session.sendToolOutput(tool_call_id, data);
+        }
     }
 };
 
