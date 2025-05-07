@@ -121,15 +121,11 @@ const onError = (session, err) => {
 
 const onToolCall = async(session, evt) => {
     const {logger} = session.locals;
-  
     const {name, args, tool_call_id} = evt;
-    const {conversationSummary} = args;
+    const {conversation_summary} = args;
     logger.info(`got toolHook for ${name} with tool_call_id ${tool_call_id}`);
-    
-    console.log('');
-    console.log(evt);
-    console.log('');
-    session.conversationSummary = conversationSummary;
+
+    session.locals.conversation_summary = conversation_summary;
 
     try {
         const data = {
@@ -143,12 +139,6 @@ const onToolCall = async(session, evt) => {
                 {
                     verb: 'say',
                     text: 'Please wait while I connect your call'
-                },
-                {
-                    verb: 'tag',
-                    data: {
-                        summary: conversationSummary
-                    }
                 },
                 {
                     verb: 'dial',
@@ -190,14 +180,12 @@ const dialAction = async(session, evt) => {
 }
 
 const confirmAction = async(session, evt) => {
-    console.log('confirmAction');
-    
-    console.log(session, evt);
-
+    conversation_summary = session.locals.conversation_summary;
+    logger.info(`Summary: ${conversation_summary}`);
 
     session
         .pause({length: 1})
-        .say({text: session.conversationSummary})
+        .say({text: "The summary of the conversation so far is: " + conversation_summary})
         .reply();
 }
 
