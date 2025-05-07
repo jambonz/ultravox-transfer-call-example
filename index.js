@@ -120,24 +120,23 @@ const onError = (session, err) => {
 };
 
 const onToolCall = async(session, evt) => {
+    const {logger} = session.locals;
+    const {name, args, tool_call_id} = evt;
+    const {conversation_summary} = args;
+    logger.info({evt}, `got toolHook for ${name} with tool_call_id ${tool_call_id}`);
+
+    session.locals.conversation_summary = conversation_summary;
     let timeoutID;
-    if (timeoutID === undefined) {
-        // This is the first time we are calling the tool    
-        const {logger} = session.locals;
-        const {name, args, tool_call_id} = evt;
-        const {conversation_summary} = args;
-        logger.info({evt}, `got toolHook for ${name} with tool_call_id ${tool_call_id}`);
 
-        session.locals.conversation_summary = conversation_summary;
-
-        try {
+    try {
+        if (timeoutID === undefined) {
             const data = {
                 type: 'client_tool_result',
                 invocation_id: tool_call_id,
                 result: "Successfully transferred call to agent, telling user to wait for a moment.",
             };
-        
-            timeoutID = setTimeout(() => {
+
+            setTimeout(() => {
                 session.sendCommand('redirect', [
                     {
                         verb: 'say',
@@ -157,19 +156,25 @@ const onToolCall = async(session, evt) => {
                         ]
                     }
                 ]);
-            }, 5000);
-        
+            }, 5000);    
             session.sendToolOutput(tool_call_id, data);
-        
-        } catch (err) {
-            logger.info({err}, 'error transferring call');
+        } else {
             const data = {
                 type: 'client_tool_result',
                 invocation_id: tool_call_id,
-                error_message: 'Failed to transfer call'
+                result: 'Duplicate tool call within timeot period, ignoring.'
             };
             session.sendToolOutput(tool_call_id, data);
         }
+  
+    } catch (err) {
+        logger.info({err}, 'error transferring call');
+        const data = {
+            type: 'client_tool_result',
+            invocation_id: tool_call_id,
+            error_message: 'Failed to transfer call'
+        };
+        session.sendToolOutput(tool_call_id, data);
     }
 };
 
