@@ -1,8 +1,8 @@
-# Ultravox-s2s
+# Transfer an Inbound Call From Ultravox Agent to Human
 
 This is an example Jambonz application that connects to the Ultravox Realtime API and illustrates how to build a Voice-AI application that transfers the caller from an AI agent to a human agent. The human agent receives a text-to-speech summary of the previous conversation on handoff. 
 
-When building agents with Ultravox, you can extend your agents' capabilities by connecting them to external services and systems via [tools](https://docs.ultravox.ai/essentials/tools)—functions that agents can invoke to perform specific actions or retrieve information. These tools can be implemented as either client or server tools; we're implementing the transfer call function using client tools in this sample application. 
+When building agents with Ultravox, you can extend your agents' capabilities by connecting them to external services and systems via [tools](https://docs.ultravox.ai/essentials/tools)—functions that agents can invoke to perform specific actions or retrieve information. These tools can be implemented as either client or server tools; we're implementing the transfer call functionality using client tools in this sample application. 
 Read more about client vs server tools in the [Ultravox docs](https://docs.ultravox.ai/essentials/tools#server-vs-client-tools).
 
 ## Prerequisites
