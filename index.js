@@ -13,7 +13,7 @@ const service = ({logger, makeService}) => {
     svc.on('session:new', (session) => {
 
         session.locals = {logger: logger.child({call_sid: session.call_sid})};
-        logger.info(`new incoming call: ${session.call_sid}`);
+        logger.info({session}, `new incoming call: ${session.call_sid}`);
   
         const apiKey = process.env.ULTRAVOX_API_KEY;
   
@@ -111,7 +111,7 @@ const onFinal = async(session, evt) => {
 
 const onClose = (session, code, reason) => {
     const {logger} = session.locals;
-    logger.info({ code, reason}, `session ${session.call_sid} closed`);
+    logger.info({session, code, reason}, `session ${session.call_sid} closed`);
 };
 
 const onError = (session, err) => {
@@ -123,7 +123,7 @@ const onToolCall = async(session, evt) => {
     const {logger} = session.locals;
     const {name, args, tool_call_id} = evt;
     const {conversation_summary} = args;
-    logger.info(`got toolHook for ${name} with tool_call_id ${tool_call_id}`);
+    logger.info({evt}, `got toolHook for ${name} with tool_call_id ${tool_call_id}`);
 
     session.locals.conversation_summary = conversation_summary;
 
