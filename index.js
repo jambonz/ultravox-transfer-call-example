@@ -24,7 +24,8 @@ const service = ({logger, makeService}) => {
                 .on('close', onClose.bind(null, session))
                 .on('error', onError.bind(null, session))
                 .on('/toolCall', onToolCall.bind(null, session))
-                .on('/dialAction', dialAction.bind(null, session));
+                .on('/dialAction', dialAction.bind(null, session))
+                .on('/confirmAction', confirmAction.bind(null, session));
         
             session
                 .answer()
@@ -39,7 +40,7 @@ const service = ({logger, makeService}) => {
                     eventHook: '/event',
                     toolHook: '/toolCall',
                     llmOptions: {
-                        systemPrompt: 'You are an agent named Karen. You can help the caller with simple questions or transfer them to a human agent. Be brief.',
+                        systemPrompt: 'You are an agent named Karen. You can help the caller with simple questions or transfer them to a human agent. Be brief. When you call the tool to transfer the call provide a brief summary of the call with the user so far.',
                         firstSpeaker: 'FIRST_SPEAKER_AGENT',
                         initialMessages: [{
                             medium: 'MESSAGE_MEDIUM_VOICE',
@@ -53,6 +54,17 @@ const service = ({logger, makeService}) => {
                                 temporaryTool: {
                                     modelToolName: 'call-transfer',
                                     description: 'Transfers the call to a human agent',
+                                    dynamicParameters: [
+                                        {
+                                          name: 'conversationSummary',
+                                          location: 'PARAMETER_LOCATION_BODY',
+                                          schema: {
+                                            type: 'string',
+                                            description: 'A summary of the conversation so far'
+                                          },
+                                          required: true
+                                        }
+                                      ],
                                     client: {}
                                 }
                             }
@@ -61,6 +73,7 @@ const service = ({logger, makeService}) => {
                 })
                 .hangup()
                 .send();
+
         } catch (err) {
           session.locals.logger.info({err}, `Error to responding to incoming call: ${session.call_sid}`);
           session.close();
@@ -108,11 +121,12 @@ const onError = (session, err) => {
 
 const onToolCall = async(session, evt) => {
     const {logger} = session.locals;
-  
     const {name, args, tool_call_id} = evt;
-    const {callSid} = args;
+    const {conversation_summary} = args;
     logger.info({evt}, `got toolHook for ${name} with tool_call_id ${tool_call_id}`);
-  
+
+    session.locals.conversation_summary = conversation_summary;
+
     try {
         const data = {
             type: 'client_tool_result',
@@ -129,6 +143,7 @@ const onToolCall = async(session, evt) => {
                 {
                     verb: 'dial',
                     actionHook: '/dialAction',
+                    confirmHook: '/confirmAction',
                     callerId: process.env.HUMAN_AGENT_CALLERID,
                     target: [
                         {
@@ -163,6 +178,18 @@ const dialAction = async(session, evt) => {
         .hangup()
         .reply();
 }
+
+const confirmAction = async(session, evt) => {
+    conversation_summary = session.locals.conversation_summary;
+    logger.info(`Summary: ${conversation_summary}`);
+
+    session
+        .pause({length: 1})
+        .say({text: "The summary of the conversation so far is: " + conversation_summary})
+        .reply();
+}
+
+
 
 module.exports = service;
 service({logger, makeService});  
