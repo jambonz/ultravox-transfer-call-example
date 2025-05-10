@@ -162,7 +162,7 @@ const onToolCall = async(session, evt) => {
             const data = {
                 type: 'client_tool_result',
                 invocation_id: tool_call_id,
-                result: 'Duplicate tool call within timeot period, ignoring.'
+                result: 'Duplicate tool call within timeout period, ignoring.'
             };
             session.sendToolOutput(tool_call_id, data);
         }
