@@ -40,7 +40,7 @@ const service = ({logger, makeService}) => {
                     eventHook: '/event',
                     toolHook: '/toolCall',
                     llmOptions: {
-                        systemPrompt: 'You are an agent named Karen. You can help the caller with simple questions or transfer them to a human agent. Be brief. When you call the tool to transfer the call provide a brief summary of the call with the user so far.',
+                        systemPrompt: 'You are an agent named Karen. You can help the caller with simple questions or transfer them to a human agent. Be brief. When you call the tool to transfer the call provide a brief summary of the call with the user so far. Let the caller know you are going to transfer them and then immediately call the call-transfer tool.',
                         firstSpeaker: 'FIRST_SPEAKER_AGENT',
                         initialMessages: [{
                             medium: 'MESSAGE_MEDIUM_VOICE',
@@ -134,27 +134,27 @@ const onToolCall = async(session, evt) => {
             result: "Successfully transferred call to agent, telling user to wait for a moment.",
         };
     
-        setTimeout(() => {
-            session.sendCommand('redirect', [
-                {
-                    verb: 'say',
-                    text: 'Please wait while I connect your call'
-                },
-                {
-                    verb: 'dial',
-                    actionHook: '/dialAction',
-                    confirmHook: '/confirmAction',
-                    callerId: process.env.HUMAN_AGENT_CALLERID,
-                    target: [
-                        {
-                            type: 'phone',
-                            number: process.env.HUMAN_AGENT_NUMBER,
-                            trunk: process.env.HUMAN_AGENT_TRUNK
-                        }
-                    ]
-                }
-            ]);
-        }, 5000);
+        
+        session.sendCommand('redirect', [
+            {
+                verb: 'say',
+                text: 'Please wait while I connect your call'
+            },
+            {
+                verb: 'dial',
+                actionHook: '/dialAction',
+                confirmHook: '/confirmAction',
+                callerId: process.env.HUMAN_AGENT_CALLERID,
+                target: [
+                    {
+                        type: 'phone',
+                        number: process.env.HUMAN_AGENT_NUMBER,
+                        trunk: process.env.HUMAN_AGENT_TRUNK
+                    }
+                ]
+            }
+        ]);
+    
     
         session.sendToolOutput(tool_call_id, data);
   
