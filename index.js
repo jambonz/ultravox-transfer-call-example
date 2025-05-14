@@ -56,7 +56,7 @@ const service = ({logger, makeService}) => {
                                     description: 'Transfers the call to a human agent',
                                     dynamicParameters: [
                                         {
-                                          name: 'conversationSummary',
+                                          name: 'conversation_summary',
                                           location: 'PARAMETER_LOCATION_BODY',
                                           schema: {
                                             type: 'string',
